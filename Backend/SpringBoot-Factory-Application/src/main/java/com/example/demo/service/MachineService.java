@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.dto.MachineRequest;
 import com.example.demo.entity.Machine;
 import com.example.demo.entity.Plant;
@@ -29,7 +30,7 @@ public class MachineService {
 
         Plant plant = plantRepository.findById(request.getPlantId())
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "PLANT NOT FOUND: " + request.getPlantId()
                         ));
 
@@ -54,7 +55,7 @@ public class MachineService {
 
         return machineRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "MACHINE NOT FOUND: " + id
                         ));
     }
@@ -64,13 +65,13 @@ public class MachineService {
 
         Machine machine = machineRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "MACHINE NOT FOUND: " + id
                         ));
 
         Plant plant = plantRepository.findById(request.getPlantId())
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "PLANT NOT FOUND: " + request.getPlantId()
                         ));
 
@@ -87,7 +88,7 @@ public class MachineService {
 
         Machine machine = machineRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "MACHINE NOT FOUND: " + id
                         ));
 

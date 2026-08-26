@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.dto.TelemetryRequest;
 import com.example.demo.entity.Machine;
 import com.example.demo.entity.Telemetry;
@@ -30,7 +30,7 @@ public class TelemetryService {
         Machine machine = machineRepository
                 .findById(request.getMachineId())
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "MACHINE NOT FOUND: " + request.getMachineId()
                         ));
 
@@ -58,7 +58,7 @@ public class TelemetryService {
         return telemetryRepository
                 .findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "TELEMETRY NOT FOUND: " + id
                         ));
     }
@@ -73,7 +73,7 @@ public class TelemetryService {
         Telemetry telemetry = telemetryRepository
                 .findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "TELEMETRY NOT FOUND: " + id
                         ));
 

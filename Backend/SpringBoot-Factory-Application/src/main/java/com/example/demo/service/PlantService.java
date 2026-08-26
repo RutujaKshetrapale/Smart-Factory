@@ -3,7 +3,7 @@ package com.example.demo.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.dto.PlantRequest;
 import com.example.demo.entity.Plant;
 import com.example.demo.repository.PlantRepository;
@@ -40,7 +40,7 @@ public class PlantService {
 
         return plantRepository.findById(id)
                 .orElseThrow(() ->
-                    new RuntimeException("Plant not found: " + id)
+                    new ResourceNotFoundException("Plant not found: " + id)
                 );
     }
 
@@ -49,7 +49,7 @@ public class PlantService {
 
         Plant plant = plantRepository.findById(id)
                 .orElseThrow(() ->
-                    new RuntimeException("Plant not found: " + id)
+                    new ResourceNotFoundException("Plant not found: " + id)
                 );
 
         plant.setName(request.getName());
@@ -63,7 +63,7 @@ public class PlantService {
 
         Plant plant = plantRepository.findById(id)
                 .orElseThrow(() ->
-                    new RuntimeException("Plant not found: " + id)
+                    new ResourceNotFoundException("Plant not found: " + id)
                 );
 
         plantRepository.delete(plant);
