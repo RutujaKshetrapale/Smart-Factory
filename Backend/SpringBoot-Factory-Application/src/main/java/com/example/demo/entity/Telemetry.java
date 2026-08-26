@@ -20,8 +20,6 @@ public class Telemetry {
 
     private Double rpm;
 
-    private Double energyConsumption;
-
     private LocalDateTime timestamp;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -65,14 +63,6 @@ public class Telemetry {
 
     public void setRpm(Double rpm) {
         this.rpm = rpm;
-    }
-
-    public Double getEnergyConsumption() {
-        return energyConsumption;
-    }
-
-    public void setEnergyConsumption(Double energyConsumption) {
-        this.energyConsumption = energyConsumption;
     }
 
     public LocalDateTime getTimestamp() {

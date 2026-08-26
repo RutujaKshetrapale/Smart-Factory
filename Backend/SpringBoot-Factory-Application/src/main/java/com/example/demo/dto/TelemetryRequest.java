@@ -17,9 +17,6 @@ public class TelemetryRequest {
     private Double rpm;
 
     @NotNull
-    private Double energyConsumption;
-
-    @NotNull
     private Long machineId;
 
     public Double getTemperature() {
@@ -52,14 +49,6 @@ public class TelemetryRequest {
 
     public void setRpm(Double rpm) {
         this.rpm = rpm;
-    }
-
-    public Double getEnergyConsumption() {
-        return energyConsumption;
-    }
-
-    public void setEnergyConsumption(Double energyConsumption) {
-        this.energyConsumption = energyConsumption;
     }
 
     public Long getMachineId() {

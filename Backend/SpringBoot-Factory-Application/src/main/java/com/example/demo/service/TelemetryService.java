@@ -41,7 +41,6 @@ public class TelemetryService {
         telemetry.setVibration(request.getVibration());
         telemetry.setPressure(request.getPressure());
         telemetry.setRpm(request.getRpm());
-        telemetry.setEnergyConsumption(request.getEnergyConsumption());
 
         telemetry.setTimestamp(LocalDateTime.now());
 
