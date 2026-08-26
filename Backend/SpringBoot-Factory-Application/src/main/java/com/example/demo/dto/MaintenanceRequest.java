@@ -21,6 +21,11 @@ public class MaintenanceRequest {
     @FutureOrPresent
     private LocalDate scheduledDate;
 
+    private LocalDate completedDate;
+
+    @NotBlank
+    private String status;
+
     @NotBlank
     private String technician;
 
@@ -54,6 +59,22 @@ public class MaintenanceRequest {
 
     public void setScheduledDate(LocalDate scheduledDate) {
         this.scheduledDate = scheduledDate;
+    }
+
+    public LocalDate getCompletedDate() {
+        return completedDate;
+    }
+
+    public void setCompletedDate(LocalDate completedDate) {
+        this.completedDate = completedDate;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getTechnician() {

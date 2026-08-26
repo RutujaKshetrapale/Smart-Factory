@@ -1,14 +1,16 @@
 package com.example.demo.exception;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -16,7 +18,8 @@ public class GlobalExceptionHandler {
     // RESOURCE NOT FOUND
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleResourceNotFound(
-            ResourceNotFoundException ex) {
+            ResourceNotFoundException ex,
+            HttpServletRequest request) {
 
         Map<String, Object> response = new HashMap<>();
 
@@ -24,6 +27,7 @@ public class GlobalExceptionHandler {
         response.put("status", 404);
         response.put("error", "Not Found");
         response.put("message", ex.getMessage());
+        response.put("path", request.getRequestURI());
 
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
@@ -33,7 +37,8 @@ public class GlobalExceptionHandler {
     // VALIDATION ERRORS
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationErrors(
-            MethodArgumentNotValidException ex) {
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request) {
 
         Map<String, String> errors = new HashMap<>();
 
@@ -53,6 +58,7 @@ public class GlobalExceptionHandler {
         response.put("error", "Bad Request");
         response.put("message", "Validation failed");
         response.put("errors", errors);
+        response.put("path", request.getRequestURI());
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
@@ -62,7 +68,8 @@ public class GlobalExceptionHandler {
     // GENERAL EXCEPTION
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneralException(
-            Exception ex) {
+            Exception ex,
+            HttpServletRequest request) {
 
         Map<String, Object> response = new HashMap<>();
 
@@ -70,6 +77,7 @@ public class GlobalExceptionHandler {
         response.put("status", 500);
         response.put("error", "Internal Server Error");
         response.put("message", ex.getMessage());
+        response.put("path", request.getRequestURI());
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

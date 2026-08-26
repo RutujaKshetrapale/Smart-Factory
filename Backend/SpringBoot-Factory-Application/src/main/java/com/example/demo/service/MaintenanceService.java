@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.example.demo.dto.MaintenanceRequest;
 import com.example.demo.entity.Machine;
 import com.example.demo.entity.Maintenance;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.MachineRepository;
 import com.example.demo.repository.MaintenanceRepository;
 
@@ -31,8 +32,8 @@ public class MaintenanceService {
         Machine machine = machineRepository
                 .findById(request.getMachineId())
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "MACHINE NOT FOUND: "
+                        new ResourceNotFoundException(
+                                "Machine not found: "
                                 + request.getMachineId()
                         ));
 
@@ -44,7 +45,9 @@ public class MaintenanceService {
         maintenance.setScheduledDate(request.getScheduledDate());
         maintenance.setTechnician(request.getTechnician());
 
-        maintenance.setStatus("PENDING");
+        maintenance.setStatus(request.getStatus());
+        maintenance.setCompletedDate(request.getCompletedDate());
+
         maintenance.setCreatedAt(LocalDateTime.now());
 
         return maintenanceRepository.save(maintenance);
@@ -60,8 +63,8 @@ public class MaintenanceService {
         return maintenanceRepository
                 .findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "MAINTENANCE NOT FOUND: " + id
+                        new ResourceNotFoundException(
+                                "Maintenance not found: " + id
                         ));
     }
 
