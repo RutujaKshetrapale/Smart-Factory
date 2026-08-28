@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.security.access.prepost.PreAuthorize;
 import com.example.demo.dto.PlantRequest;
 import com.example.demo.entity.Plant;
 import com.example.demo.service.PlantService;
@@ -24,6 +24,7 @@ public class PlantController {
 
     // CREATE
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Plant> create(
             @Valid @RequestBody PlantRequest request) {
 
@@ -55,6 +56,7 @@ public class PlantController {
 
     // UPDATE
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Plant> update(
             @PathVariable Long id,
             @Valid @RequestBody PlantRequest request) {
@@ -66,6 +68,7 @@ public class PlantController {
 
     // DELETE
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(
             @PathVariable Long id) {
 
