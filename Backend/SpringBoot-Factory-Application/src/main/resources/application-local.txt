@@ -1,0 +1,2 @@
+spring.datasource.password=21011017
+jwt.secret=SmartFactorySecretKeyForDevelopmentOnly123456789
