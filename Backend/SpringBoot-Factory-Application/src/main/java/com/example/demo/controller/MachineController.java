@@ -5,14 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.dto.MachineRequest;
 import com.example.demo.entity.Machine;
@@ -30,21 +23,28 @@ public class MachineController {
         this.machineService = machineService;
     }
 
+    // =========================
     // CREATE MACHINE
+    // ADMIN ONLY
+    // =========================
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Machine> create(
             @Valid @RequestBody MachineRequest request) {
 
-        Machine machine = machineService.create(request);
-
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(machine);
+                .body(machineService.create(request));
     }
 
+    // =========================
     // GET ALL MACHINES
+    // ALL AUTHENTICATED ROLES
+    // =========================
+
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR', 'MANAGER')")
     public ResponseEntity<List<Machine>> getAll() {
 
         return ResponseEntity.ok(
@@ -52,8 +52,13 @@ public class MachineController {
         );
     }
 
+    // =========================
     // GET MACHINE BY ID
+    // ALL AUTHENTICATED ROLES
+    // =========================
+
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR', 'MANAGER')")
     public ResponseEntity<Machine> getById(
             @PathVariable Long id) {
 
@@ -62,9 +67,13 @@ public class MachineController {
         );
     }
 
+    // =========================
     // UPDATE MACHINE
-    @PreAuthorize("hasRole('ADMIN')")
+    // ADMIN ONLY
+    // =========================
+
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Machine> update(
             @PathVariable Long id,
             @Valid @RequestBody MachineRequest request) {
@@ -74,7 +83,11 @@ public class MachineController {
         );
     }
 
+    // =========================
     // DELETE MACHINE
+    // ADMIN ONLY
+    // =========================
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(

@@ -1,14 +1,16 @@
 package com.example.demo.service;
 
-import com.example.demo.exception.ResourceNotFoundException;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.example.demo.dto.EnergyRequest;
 import com.example.demo.entity.Energy;
 import com.example.demo.entity.Machine;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.EnergyRepository;
 import com.example.demo.repository.MachineRepository;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class EnergyService {
@@ -24,68 +26,114 @@ public class EnergyService {
         this.machineRepository = machineRepository;
     }
 
-    // CREATE
+    // =========================
+    // CREATE ENERGY RECORD
+    // =========================
+
     public Energy create(EnergyRequest request) {
 
-        Machine machine = machineRepository.findById(request.getMachineId())
+        Machine machine = machineRepository
+                .findById(request.getMachineId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "MACHINE NOT FOUND: " + request.getMachineId()
+                                "MACHINE NOT FOUND: "
+                                + request.getMachineId()
                         ));
 
         Energy energy = new Energy();
 
-        energy.setEnergyConsumption(request.getEnergyConsumption());
-        energy.setRecordedAt(request.getRecordedAt());
         energy.setMachine(machine);
+        energy.setEnergyConsumption(
+                request.getEnergyConsumption()
+        );
+        energy.setRecordedAt(LocalDateTime.now());
 
         return energyRepository.save(energy);
     }
 
-    // GET ALL
+    // =========================
+    // GET ALL ENERGY RECORDS
+    // =========================
+
     public List<Energy> getAll() {
 
         return energyRepository.findAll();
     }
 
-    // GET BY ID
+    // =========================
+    // GET ENERGY BY ID
+    // =========================
+
     public Energy getById(Long id) {
 
-        return energyRepository.findById(id)
+        return energyRepository
+                .findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "ENERGY RECORD NOT FOUND: " + id
                         ));
     }
 
-    // GET BY MACHINE
-    public List<Energy> getByMachineId(Long machineId) {
+    // =========================
+    // GET ENERGY BY MACHINE
+    // =========================
+
+    public List<Energy> getByMachine(Long machineId) {
+
+        if (!machineRepository.existsById(machineId)) {
+
+            throw new ResourceNotFoundException(
+                    "MACHINE NOT FOUND: " + machineId
+            );
+        }
 
         return energyRepository.findByMachineId(machineId);
     }
 
-    // UPDATE
-    public Energy update(Long id, EnergyRequest request) {
+    // =========================
+    // UPDATE ENERGY RECORD
+    // =========================
 
-        Energy energy = getById(id);
+    public Energy update(
+            Long id,
+            EnergyRequest request) {
 
-        Machine machine = machineRepository.findById(request.getMachineId())
+        Energy energy = energyRepository
+                .findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "MACHINE NOT FOUND: " + request.getMachineId()
+                                "ENERGY RECORD NOT FOUND: " + id
                         ));
 
-        energy.setEnergyConsumption(request.getEnergyConsumption());
-        energy.setRecordedAt(request.getRecordedAt());
+        Machine machine = machineRepository
+                .findById(request.getMachineId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "MACHINE NOT FOUND: "
+                                + request.getMachineId()
+                        ));
+
         energy.setMachine(machine);
+
+        energy.setEnergyConsumption(
+                request.getEnergyConsumption()
+        );
 
         return energyRepository.save(energy);
     }
 
-    // DELETE
+    // =========================
+    // DELETE ENERGY RECORD
+    // =========================
+
     public void delete(Long id) {
 
-        Energy energy = getById(id);
+        Energy energy = energyRepository
+                .findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "ENERGY RECORD NOT FOUND: " + id
+                        ));
 
         energyRepository.delete(energy);
     }

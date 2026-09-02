@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.dto.AlertRequest;
@@ -22,7 +23,13 @@ public class AlertController {
         this.alertService = alertService;
     }
 
+    // =========================
+    // CREATE ALERT
+    // ADMIN + ENGINEER
+    // =========================
+
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER')")
     public ResponseEntity<Alert> create(
             @Valid @RequestBody AlertRequest request) {
 
@@ -31,7 +38,13 @@ public class AlertController {
                 .body(alertService.create(request));
     }
 
+    // =========================
+    // GET ALL ALERTS
+    // ALL ROLES
+    // =========================
+
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR', 'MANAGER')")
     public ResponseEntity<List<Alert>> getAll() {
 
         return ResponseEntity.ok(
@@ -39,7 +52,13 @@ public class AlertController {
         );
     }
 
+    // =========================
+    // GET ALERT BY ID
+    // ALL ROLES
+    // =========================
+
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR', 'MANAGER')")
     public ResponseEntity<Alert> getById(
             @PathVariable Long id) {
 
@@ -48,7 +67,13 @@ public class AlertController {
         );
     }
 
+    // =========================
+    // GET ALERTS BY MACHINE
+    // ALL ROLES
+    // =========================
+
     @GetMapping("/machine/{machineId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR', 'MANAGER')")
     public ResponseEntity<List<Alert>> getByMachine(
             @PathVariable Long machineId) {
 
@@ -57,38 +82,36 @@ public class AlertController {
         );
     }
 
-    @GetMapping("/unresolved")
-    public ResponseEntity<List<Alert>> getUnresolved() {
+    // =========================
+    // UPDATE ALERT
+    // ADMIN + ENGINEER
+    // =========================
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER')")
+    public ResponseEntity<Alert> update(
+            @PathVariable Long id,
+            @Valid @RequestBody AlertRequest request) {
 
         return ResponseEntity.ok(
-                alertService.getUnresolved()
+                alertService.update(id, request)
         );
     }
 
-    @GetMapping("/severity/{severity}")
-    public ResponseEntity<List<Alert>> getBySeverity(
-            @PathVariable String severity) {
-
-        return ResponseEntity.ok(
-                alertService.getBySeverity(severity)
-        );
-    }
-
-    @PatchMapping("/{id}/resolve")
-    public ResponseEntity<Alert> resolve(
-            @PathVariable Long id) {
-
-        return ResponseEntity.ok(
-                alertService.resolve(id)
-        );
-    }
+    // =========================
+    // DELETE ALERT
+    // ADMIN ONLY
+    // =========================
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(
             @PathVariable Long id) {
 
         alertService.delete(id);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 }

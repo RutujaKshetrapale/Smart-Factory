@@ -10,42 +10,43 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // =========================
     // RESOURCE NOT FOUND
+    // =========================
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleResourceNotFound(
-            ResourceNotFoundException ex,
-            HttpServletRequest request) {
+            ResourceNotFoundException ex) {
 
-        Map<String, Object> response = new HashMap<>();
+        Map<String, Object> error = new HashMap<>();
 
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", 404);
-        response.put("error", "Not Found");
-        response.put("message", ex.getMessage());
-        response.put("path", request.getRequestURI());
+        error.put("timestamp", LocalDateTime.now());
+        error.put("status", HttpStatus.NOT_FOUND.value());
+        error.put("error", "NOT FOUND");
+        error.put("message", ex.getMessage());
 
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(response);
+                .body(error);
     }
 
-    // VALIDATION ERRORS
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationErrors(
-            MethodArgumentNotValidException ex,
-            HttpServletRequest request) {
+    // =========================
+    // VALIDATION ERROR
+    // =========================
 
-        Map<String, String> errors = new HashMap<>();
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidationException(
+            MethodArgumentNotValidException ex) {
+
+        Map<String, String> validationErrors = new HashMap<>();
 
         ex.getBindingResult()
                 .getFieldErrors()
                 .forEach(error ->
-                        errors.put(
+                        validationErrors.put(
                                 error.getField(),
                                 error.getDefaultMessage()
                         )
@@ -54,33 +55,32 @@ public class GlobalExceptionHandler {
         Map<String, Object> response = new HashMap<>();
 
         response.put("timestamp", LocalDateTime.now());
-        response.put("status", 400);
-        response.put("error", "Bad Request");
-        response.put("message", "Validation failed");
-        response.put("errors", errors);
-        response.put("path", request.getRequestURI());
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("error", "VALIDATION FAILED");
+        response.put("messages", validationErrors);
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(response);
     }
 
+    // =========================
     // GENERAL EXCEPTION
+    // =========================
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneralException(
-            Exception ex,
-            HttpServletRequest request) {
+            Exception ex) {
 
-        Map<String, Object> response = new HashMap<>();
+        Map<String, Object> error = new HashMap<>();
 
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", 500);
-        response.put("error", "Internal Server Error");
-        response.put("message", ex.getMessage());
-        response.put("path", request.getRequestURI());
+        error.put("timestamp", LocalDateTime.now());
+        error.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        error.put("error", "INTERNAL SERVER ERROR");
+        error.put("message", ex.getMessage());
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(response);
+                .body(error);
     }
 }

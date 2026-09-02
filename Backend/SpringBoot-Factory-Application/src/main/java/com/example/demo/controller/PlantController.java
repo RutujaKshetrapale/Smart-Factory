@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.example.demo.dto.PlantRequest;
 import com.example.demo.entity.Plant;
 import com.example.demo.service.PlantService;
@@ -22,7 +23,10 @@ public class PlantController {
         this.plantService = plantService;
     }
 
-    // CREATE
+    // =========================
+    // CREATE PLANT
+    // ADMIN ONLY
+    // =========================
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Plant> create(
@@ -35,8 +39,12 @@ public class PlantController {
                 .body(plant);
     }
 
-    // READ ALL
+    // =========================
+    // READ ALL PLANTS
+    // ALL AUTHENTICATED ROLES
+    // =========================
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'ENGINEER', 'OPERATOR')")
     public ResponseEntity<List<Plant>> getAll() {
 
         return ResponseEntity.ok(
@@ -44,8 +52,12 @@ public class PlantController {
         );
     }
 
-    // READ ONE
+    // =========================
+    // READ ONE PLANT
+    // ALL AUTHENTICATED ROLES
+    // =========================
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'ENGINEER', 'OPERATOR')")
     public ResponseEntity<Plant> getById(
             @PathVariable Long id) {
 
@@ -54,7 +66,10 @@ public class PlantController {
         );
     }
 
-    // UPDATE
+    // =========================
+    // UPDATE PLANT
+    // ADMIN ONLY
+    // =========================
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Plant> update(
@@ -66,7 +81,10 @@ public class PlantController {
         );
     }
 
-    // DELETE
+    // =========================
+    // DELETE PLANT
+    // ADMIN ONLY
+    // =========================
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(

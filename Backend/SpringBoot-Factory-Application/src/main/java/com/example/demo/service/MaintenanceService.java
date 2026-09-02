@@ -1,6 +1,5 @@
 package com.example.demo.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,13 +26,17 @@ public class MaintenanceService {
         this.machineRepository = machineRepository;
     }
 
+    // =========================
+    // CREATE MAINTENANCE
+    // =========================
+
     public Maintenance create(MaintenanceRequest request) {
 
         Machine machine = machineRepository
                 .findById(request.getMachineId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Machine not found: "
+                                "MACHINE NOT FOUND: "
                                 + request.getMachineId()
                         ));
 
@@ -43,20 +46,26 @@ public class MaintenanceService {
         maintenance.setType(request.getType());
         maintenance.setDescription(request.getDescription());
         maintenance.setScheduledDate(request.getScheduledDate());
-        maintenance.setTechnician(request.getTechnician());
-
-        maintenance.setStatus(request.getStatus());
         maintenance.setCompletedDate(request.getCompletedDate());
-
+        maintenance.setStatus(request.getStatus());
+        maintenance.setTechnician(request.getTechnician());
         maintenance.setCreatedAt(LocalDateTime.now());
 
         return maintenanceRepository.save(maintenance);
     }
 
+    // =========================
+    // GET ALL MAINTENANCE
+    // =========================
+
     public List<Maintenance> getAll() {
 
         return maintenanceRepository.findAll();
     }
+
+    // =========================
+    // GET MAINTENANCE BY ID
+    // =========================
 
     public Maintenance getById(Long id) {
 
@@ -64,34 +73,92 @@ public class MaintenanceService {
                 .findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Maintenance not found: " + id
+                                "MAINTENANCE NOT FOUND: " + id
                         ));
     }
 
+    // =========================
+    // GET MAINTENANCE BY MACHINE
+    // =========================
+
     public List<Maintenance> getByMachine(Long machineId) {
+
+        if (!machineRepository.existsById(machineId)) {
+
+            throw new ResourceNotFoundException(
+                    "MACHINE NOT FOUND: " + machineId
+            );
+        }
 
         return maintenanceRepository.findByMachineId(machineId);
     }
 
-    public List<Maintenance> getPending() {
+    // =========================
+    // GET MAINTENANCE BY STATUS
+    // =========================
 
-        return maintenanceRepository
-                .findByStatusOrderByScheduledDateAsc("PENDING");
+    public List<Maintenance> getByStatus(String status) {
+
+        return maintenanceRepository.findByStatus(status);
     }
 
-    public Maintenance complete(Long id) {
+    // =========================
+    // GET BY STATUS
+    // ORDERED BY DATE
+    // =========================
 
-        Maintenance maintenance = getById(id);
+    public List<Maintenance> getByStatusOrderByDate(String status) {
 
-        maintenance.setStatus("COMPLETED");
-        maintenance.setCompletedDate(LocalDate.now());
+        return maintenanceRepository
+                .findByStatusOrderByScheduledDateAsc(status);
+    }
+
+    // =========================
+    // UPDATE MAINTENANCE
+    // =========================
+
+    public Maintenance update(
+            Long id,
+            MaintenanceRequest request) {
+
+        Maintenance maintenance = maintenanceRepository
+                .findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "MAINTENANCE NOT FOUND: " + id
+                        ));
+
+        Machine machine = machineRepository
+                .findById(request.getMachineId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "MACHINE NOT FOUND: "
+                                + request.getMachineId()
+                        ));
+
+        maintenance.setMachine(machine);
+        maintenance.setType(request.getType());
+        maintenance.setDescription(request.getDescription());
+        maintenance.setScheduledDate(request.getScheduledDate());
+        maintenance.setCompletedDate(request.getCompletedDate());
+        maintenance.setStatus(request.getStatus());
+        maintenance.setTechnician(request.getTechnician());
 
         return maintenanceRepository.save(maintenance);
     }
 
+    // =========================
+    // DELETE MAINTENANCE
+    // =========================
+
     public void delete(Long id) {
 
-        Maintenance maintenance = getById(id);
+        Maintenance maintenance = maintenanceRepository
+                .findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "MAINTENANCE NOT FOUND: " + id
+                        ));
 
         maintenanceRepository.delete(maintenance);
     }

@@ -17,16 +17,6 @@ public class MachineRequest {
     @NotNull
     private Long plantId;
 
-    public MachineRequest() {
-    }
-
-    public MachineRequest(String name, String type, String status, Long plantId) {
-        this.name = name;
-        this.type = type;
-        this.status = status;
-        this.plantId = plantId;
-    }
-
     public String getName() {
         return name;
     }

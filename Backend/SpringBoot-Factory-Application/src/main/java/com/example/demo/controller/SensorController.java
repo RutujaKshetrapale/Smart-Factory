@@ -3,8 +3,12 @@ package com.example.demo.controller;
 import com.example.demo.dto.SensorRequest;
 import com.example.demo.entity.Sensor;
 import com.example.demo.service.SensorService;
+
 import jakarta.validation.Valid;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,17 +23,20 @@ public class SensorController {
         this.sensorService = sensorService;
     }
 
-    // CREATE
+    // CREATE SENSOR
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER')")
     public ResponseEntity<Sensor> create(
             @Valid @RequestBody SensorRequest request) {
 
-        return ResponseEntity.ok(
-                sensorService.create(request)
-        );
+        Sensor sensor = sensorService.create(request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(sensor);
     }
 
-    // GET ALL
+    // GET ALL SENSORS
     @GetMapping
     public ResponseEntity<List<Sensor>> getAll() {
 
@@ -38,7 +45,7 @@ public class SensorController {
         );
     }
 
-    // GET BY ID
+    // GET SENSOR BY ID
     @GetMapping("/{id}")
     public ResponseEntity<Sensor> getById(
             @PathVariable Long id) {
@@ -58,8 +65,9 @@ public class SensorController {
         );
     }
 
-    // UPDATE
+    // UPDATE SENSOR
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER')")
     public ResponseEntity<Sensor> update(
             @PathVariable Long id,
             @Valid @RequestBody SensorRequest request) {
@@ -69,8 +77,9 @@ public class SensorController {
         );
     }
 
-    // ACTIVATE
+    // ACTIVATE SENSOR
     @PatchMapping("/{id}/activate")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER')")
     public ResponseEntity<Sensor> activate(
             @PathVariable Long id) {
 
@@ -79,8 +88,9 @@ public class SensorController {
         );
     }
 
-    // DEACTIVATE
+    // DEACTIVATE SENSOR
     @PatchMapping("/{id}/deactivate")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER')")
     public ResponseEntity<Sensor> deactivate(
             @PathVariable Long id) {
 
@@ -89,8 +99,9 @@ public class SensorController {
         );
     }
 
-    // DELETE
+    // DELETE SENSOR
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(
             @PathVariable Long id) {
 

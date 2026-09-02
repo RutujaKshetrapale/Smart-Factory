@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.dto.TelemetryRequest;
@@ -22,7 +23,13 @@ public class TelemetryController {
         this.telemetryService = telemetryService;
     }
 
+    // =========================
+    // CREATE TELEMETRY
+    // ENGINEER + OPERATOR + ADMIN
+    // =========================
+
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR')")
     public ResponseEntity<Telemetry> create(
             @Valid @RequestBody TelemetryRequest request) {
 
@@ -31,7 +38,13 @@ public class TelemetryController {
                 .body(telemetryService.create(request));
     }
 
+    // =========================
+    // GET ALL TELEMETRY
+    // ALL ROLES
+    // =========================
+
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR', 'MANAGER')")
     public ResponseEntity<List<Telemetry>> getAll() {
 
         return ResponseEntity.ok(
@@ -39,7 +52,13 @@ public class TelemetryController {
         );
     }
 
+    // =========================
+    // GET TELEMETRY BY ID
+    // ALL ROLES
+    // =========================
+
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR', 'MANAGER')")
     public ResponseEntity<Telemetry> getById(
             @PathVariable Long id) {
 
@@ -48,7 +67,13 @@ public class TelemetryController {
         );
     }
 
+    // =========================
+    // GET TELEMETRY BY MACHINE
+    // ALL ROLES
+    // =========================
+
     @GetMapping("/machine/{machineId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR', 'MANAGER')")
     public ResponseEntity<List<Telemetry>> getByMachine(
             @PathVariable Long machineId) {
 
@@ -57,7 +82,13 @@ public class TelemetryController {
         );
     }
 
+    // =========================
+    // DELETE TELEMETRY
+    // ADMIN ONLY
+    // =========================
+
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(
             @PathVariable Long id) {
 

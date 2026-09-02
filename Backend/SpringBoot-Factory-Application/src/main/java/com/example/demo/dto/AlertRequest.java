@@ -8,8 +8,6 @@ public class AlertRequest {
     @NotNull
     private Long machineId;
 
-    private Long telemetryId;
-
     @NotBlank
     private String type;
 
@@ -19,20 +17,14 @@ public class AlertRequest {
     @NotBlank
     private String message;
 
+    private boolean resolved;
+
     public Long getMachineId() {
         return machineId;
     }
 
     public void setMachineId(Long machineId) {
         this.machineId = machineId;
-    }
-
-    public Long getTelemetryId() {
-        return telemetryId;
-    }
-
-    public void setTelemetryId(Long telemetryId) {
-        this.telemetryId = telemetryId;
     }
 
     public String getType() {
@@ -57,5 +49,13 @@ public class AlertRequest {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public boolean isResolved() {
+        return resolved;
+    }
+
+    public void setResolved(boolean resolved) {
+        this.resolved = resolved;
     }
 }
