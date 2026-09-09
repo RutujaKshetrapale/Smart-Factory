@@ -5,29 +5,79 @@ import java.time.LocalDateTime;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "alerts")
+@Table(
+    name = "alerts",
+    indexes = {
+        @Index(
+            name = "idx_alert_machine",
+            columnList = "machine_id"
+        ),
+        @Index(
+            name = "idx_alert_severity",
+            columnList = "severity"
+        ),
+        @Index(
+            name = "idx_alert_resolved",
+            columnList = "resolved"
+        ),
+        @Index(
+            name = "idx_alert_created_at",
+            columnList = "created_at"
+        )
+    }
+)
 public class Alert {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(
+        nullable = false,
+        length = 50
+    )
     private String type;
 
+    @Column(
+        nullable = false,
+        length = 30
+    )
     private String severity;
 
+    @Column(
+        nullable = false,
+        length = 500
+    )
     private String message;
 
-    private boolean resolved;
+    @Column(
+        nullable = false
+    )
+    private boolean resolved = false;
 
+    @Column(
+        name = "created_at",
+        nullable = false
+    )
     private LocalDateTime createdAt;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "machine_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+        name = "machine_id",
+        nullable = false,
+        foreignKey = @ForeignKey(
+            name = "fk_alert_machine"
+        )
+    )
     private Machine machine;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "telemetry_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "telemetry_id",
+        foreignKey = @ForeignKey(
+            name = "fk_alert_telemetry"
+        )
+    )
     private Telemetry telemetry;
 
     public Alert() {

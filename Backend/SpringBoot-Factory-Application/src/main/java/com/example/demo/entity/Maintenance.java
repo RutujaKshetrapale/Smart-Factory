@@ -6,29 +6,78 @@ import java.time.LocalDateTime;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "maintenance")
+@Table(
+    name = "maintenance",
+    indexes = {
+        @Index(
+            name = "idx_maintenance_machine",
+            columnList = "machine_id"
+        ),
+        @Index(
+            name = "idx_maintenance_status",
+            columnList = "status"
+        ),
+        @Index(
+            name = "idx_maintenance_scheduled",
+            columnList = "scheduled_date"
+        )
+    }
+)
 public class Maintenance {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(
+        nullable = false,
+        length = 50
+    )
     private String type;
 
+    @Column(
+        nullable = false,
+        length = 500
+    )
     private String description;
 
+    @Column(
+        name = "scheduled_date",
+        nullable = false
+    )
     private LocalDate scheduledDate;
 
+    @Column(
+        name = "completed_date"
+    )
     private LocalDate completedDate;
 
+    @Column(
+        nullable = false,
+        length = 30
+    )
     private String status;
 
+    @Column(
+        nullable = false,
+        length = 100
+    )
     private String technician;
 
+    @Column(
+        name = "created_at",
+        nullable = false
+    )
     private LocalDateTime createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "machine_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+        name = "machine_id",
+        nullable = false,
+        foreignKey = @ForeignKey(
+            name = "fk_maintenance_machine"
+        )
+    )
     private Machine machine;
 
     public Maintenance() {

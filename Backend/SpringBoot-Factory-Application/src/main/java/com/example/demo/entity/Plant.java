@@ -3,26 +3,44 @@ package com.example.demo.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "plants")
+@Table(
+    name = "plants",
+    indexes = {
+        @Index(name = "idx_plant_location", columnList = "location"),
+        @Index(name = "idx_plant_active", columnList = "active")
+    }
+)
 public class Plant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(
+        nullable = false,
+        length = 100
+    )
     private String name;
 
-    @Column(nullable = false)
+    @Column(
+        nullable = false,
+        length = 150
+    )
     private String location;
 
-    @Column(nullable = false)
+    @Column(
+        nullable = false
+    )
     private boolean active;
 
     public Plant() {
     }
 
-    public Plant(String name, String location, boolean active) {
+    public Plant(
+            String name,
+            String location,
+            boolean active) {
+
         this.name = name;
         this.location = location;
         this.active = active;

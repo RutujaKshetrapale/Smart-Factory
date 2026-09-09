@@ -3,23 +3,50 @@ package com.example.demo.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "sensors")
+@Table(
+    name = "sensors",
+    indexes = {
+        @Index(name = "idx_sensor_machine", columnList = "machine_id"),
+        @Index(name = "idx_sensor_active", columnList = "active")
+    }
+)
 public class Sensor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(
+        nullable = false,
+        length = 100
+    )
     private String name;
 
+    @Column(
+        nullable = false,
+        length = 50
+    )
     private String type;
 
+    @Column(
+        nullable = false,
+        length = 20
+    )
     private String unit;
 
+    @Column(
+        nullable = false
+    )
     private boolean active;
 
-    @ManyToOne
-    @JoinColumn(name = "machine_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+        name = "machine_id",
+        nullable = false,
+        foreignKey = @ForeignKey(
+            name = "fk_sensor_machine"
+        )
+    )
     private Machine machine;
 
     public Sensor() {

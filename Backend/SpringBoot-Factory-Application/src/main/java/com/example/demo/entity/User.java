@@ -3,28 +3,67 @@ package com.example.demo.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "users")
+@Table(
+    name = "users",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "uk_user_username",
+            columnNames = "username"
+        ),
+        @UniqueConstraint(
+            name = "uk_user_email",
+            columnNames = "email"
+        )
+    },
+    indexes = {
+        @Index(
+            name = "idx_user_role",
+            columnList = "role"
+        ),
+        @Index(
+            name = "idx_user_active",
+            columnList = "active"
+        )
+    }
+)
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(
+        nullable = false,
+        length = 50
+    )
     private String username;
 
-    @Column(nullable = false, unique = true)
+    @Column(
+        nullable = false,
+        length = 150
+    )
     private String email;
 
-    @Column(nullable = false)
+    @Column(
+        nullable = false,
+        length = 255
+    )
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(
+        nullable = false,
+        length = 30
+    )
     private Role role;
 
-    @Column(nullable = false)
+    @Column(
+        nullable = false
+    )
     private boolean active = true;
+
+    public User() {
+    }
 
     public Long getId() {
         return id;

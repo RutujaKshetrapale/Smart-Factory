@@ -1,30 +1,73 @@
 package com.example.demo.entity;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import jakarta.persistence.*;
+
 @Entity
-@Table(name = "production")
+@Table(
+    name = "production",
+    indexes = {
+        @Index(
+            name = "idx_production_machine",
+            columnList = "machine_id"
+        ),
+        @Index(
+            name = "idx_production_status",
+            columnList = "status"
+        ),
+        @Index(
+            name = "idx_production_start",
+            columnList = "production_start"
+        )
+    }
+)
 public class Production {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(
+        nullable = false,
+        length = 100
+    )
     private String productName;
 
+    @Column(
+        nullable = false
+    )
     private Integer quantityProduced;
 
+    @Column(
+        nullable = false
+    )
     private Integer quantityRejected;
 
+    @Column(
+        nullable = false
+    )
     private LocalDateTime productionStart;
 
+    @Column(
+        name = "production_end"
+    )
     private LocalDateTime productionEnd;
 
+    @Column(
+        nullable = false,
+        length = 30
+    )
     private String status;
 
-    @ManyToOne
-    @JoinColumn(name = "machine_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+        name = "machine_id",
+        nullable = false,
+        foreignKey = @ForeignKey(
+            name = "fk_production_machine"
+        )
+    )
     private Machine machine;
 
     public Production() {
