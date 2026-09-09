@@ -1,15 +1,18 @@
 package com.example.demo.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.demo.dto.PageResponse;
 import com.example.demo.dto.ProductionRequest;
 import com.example.demo.entity.Production;
 import com.example.demo.service.ProductionService;
+import com.example.demo.util.PaginationUtil;
 
 import jakarta.validation.Valid;
 
@@ -25,11 +28,6 @@ public class ProductionController {
         this.productionService = productionService;
     }
 
-    // =========================
-    // CREATE PRODUCTION
-    // ADMIN + ENGINEER
-    // =========================
-
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER')")
     public ResponseEntity<Production> create(
@@ -40,24 +38,37 @@ public class ProductionController {
                 .body(productionService.create(request));
     }
 
-    // =========================
-    // GET ALL PRODUCTIONS
-    // ALL ROLES
-    // =========================
-
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR', 'MANAGER')")
-    public ResponseEntity<List<Production>> getAll() {
+    public ResponseEntity<?> getAll(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
 
-        return ResponseEntity.ok(
-                productionService.getAll()
-        );
+        if (page == null && size == null) {
+            return ResponseEntity.ok(
+                    productionService.getAll()
+            );
+        }
+
+        int currentPage = page == null ? 0 : page;
+        int pageSize = size == null ? 10 : size;
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable =
+                PageRequest.of(currentPage, pageSize, sort);
+
+        PageResponse<Production> response =
+                PaginationUtil.toResponse(
+                        productionService.getAll(pageable)
+                );
+
+        return ResponseEntity.ok(response);
     }
-
-    // =========================
-    // GET PRODUCTION BY ID
-    // ALL ROLES
-    // =========================
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR', 'MANAGER')")
@@ -69,40 +80,75 @@ public class ProductionController {
         );
     }
 
-    // =========================
-    // GET BY MACHINE
-    // ALL ROLES
-    // =========================
-
     @GetMapping("/machine/{machineId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR', 'MANAGER')")
-    public ResponseEntity<List<Production>> getByMachine(
-            @PathVariable Long machineId) {
+    public ResponseEntity<?> getByMachine(
+            @PathVariable Long machineId,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        if (page == null && size == null) {
+            return ResponseEntity.ok(
+                    productionService.getByMachine(machineId)
+            );
+        }
+
+        int currentPage = page == null ? 0 : page;
+        int pageSize = size == null ? 10 : size;
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable =
+                PageRequest.of(currentPage, pageSize, sort);
 
         return ResponseEntity.ok(
-                productionService.getByMachine(machineId)
+                PaginationUtil.toResponse(
+                        productionService.getByMachine(
+                                machineId,
+                                pageable
+                        )
+                )
         );
     }
-
-    // =========================
-    // GET BY STATUS
-    // ALL ROLES
-    // =========================
 
     @GetMapping("/status/{status}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR', 'MANAGER')")
-    public ResponseEntity<List<Production>> getByStatus(
-            @PathVariable String status) {
+    public ResponseEntity<?> getByStatus(
+            @PathVariable String status,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        if (page == null && size == null) {
+            return ResponseEntity.ok(
+                    productionService.getByStatus(status)
+            );
+        }
+
+        int currentPage = page == null ? 0 : page;
+        int pageSize = size == null ? 10 : size;
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable =
+                PageRequest.of(currentPage, pageSize, sort);
 
         return ResponseEntity.ok(
-                productionService.getByStatus(status)
+                PaginationUtil.toResponse(
+                        productionService.getByStatus(
+                                status,
+                                pageable
+                        )
+                )
         );
     }
-
-    // =========================
-    // UPDATE PRODUCTION
-    // ADMIN + ENGINEER
-    // =========================
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER')")
@@ -115,11 +161,6 @@ public class ProductionController {
         );
     }
 
-    // =========================
-    // DELETE PRODUCTION
-    // ADMIN ONLY
-    // =========================
-
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(
@@ -127,8 +168,6 @@ public class ProductionController {
 
         productionService.delete(id);
 
-        return ResponseEntity
-                .noContent()
-                .build();
+        return ResponseEntity.noContent().build();
     }
 }

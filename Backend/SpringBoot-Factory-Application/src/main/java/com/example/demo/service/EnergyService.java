@@ -3,6 +3,8 @@ package com.example.demo.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.EnergyRequest;
@@ -30,7 +32,8 @@ public class EnergyService {
     // CREATE ENERGY RECORD
     // =========================
 
-    public Energy create(EnergyRequest request) {
+    public Energy create(
+            EnergyRequest request) {
 
         Machine machine = machineRepository
                 .findById(request.getMachineId())
@@ -43,16 +46,20 @@ public class EnergyService {
         Energy energy = new Energy();
 
         energy.setMachine(machine);
+
         energy.setEnergyConsumption(
                 request.getEnergyConsumption()
         );
-        energy.setRecordedAt(LocalDateTime.now());
+
+        energy.setRecordedAt(
+                LocalDateTime.now()
+        );
 
         return energyRepository.save(energy);
     }
 
     // =========================
-    // GET ALL ENERGY RECORDS
+    // GET ALL
     // =========================
 
     public List<Energy> getAll() {
@@ -61,7 +68,18 @@ public class EnergyService {
     }
 
     // =========================
-    // GET ENERGY BY ID
+    // GET ALL - PAGINATED
+    // =========================
+
+    public Page<Energy> getAll(
+            Pageable pageable) {
+
+        return energyRepository
+                .findAll(pageable);
+    }
+
+    // =========================
+    // GET BY ID
     // =========================
 
     public Energy getById(Long id) {
@@ -70,40 +88,69 @@ public class EnergyService {
                 .findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "ENERGY RECORD NOT FOUND: " + id
+                                "ENERGY RECORD NOT FOUND: "
+                                + id
                         ));
     }
 
     // =========================
-    // GET ENERGY BY MACHINE
+    // GET BY MACHINE
     // =========================
 
-    public List<Energy> getByMachine(Long machineId) {
+    public List<Energy> getByMachine(
+            Long machineId) {
 
         if (!machineRepository.existsById(machineId)) {
 
             throw new ResourceNotFoundException(
-                    "MACHINE NOT FOUND: " + machineId
+                    "MACHINE NOT FOUND: "
+                    + machineId
             );
         }
 
-        return energyRepository.findByMachineId(machineId);
+        return energyRepository
+                .findByMachineId(machineId);
     }
 
     // =========================
-    // UPDATE ENERGY RECORD
+    // GET BY MACHINE - PAGINATED
+    // =========================
+
+    public Page<Energy> getByMachine(
+            Long machineId,
+            Pageable pageable) {
+
+        if (!machineRepository.existsById(machineId)) {
+
+            throw new ResourceNotFoundException(
+                    "MACHINE NOT FOUND: "
+                    + machineId
+            );
+        }
+
+        return energyRepository
+                .findByMachineId(
+                        machineId,
+                        pageable
+                );
+    }
+
+    // =========================
+    // UPDATE
     // =========================
 
     public Energy update(
             Long id,
             EnergyRequest request) {
 
-        Energy energy = energyRepository
-                .findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "ENERGY RECORD NOT FOUND: " + id
-                        ));
+        Energy energy =
+                energyRepository
+                        .findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "ENERGY RECORD NOT FOUND: "
+                                        + id
+                                ));
 
         Machine machine = machineRepository
                 .findById(request.getMachineId())
@@ -123,17 +170,19 @@ public class EnergyService {
     }
 
     // =========================
-    // DELETE ENERGY RECORD
+    // DELETE
     // =========================
 
     public void delete(Long id) {
 
-        Energy energy = energyRepository
-                .findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "ENERGY RECORD NOT FOUND: " + id
-                        ));
+        Energy energy =
+                energyRepository
+                        .findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "ENERGY RECORD NOT FOUND: "
+                                        + id
+                                ));
 
         energyRepository.delete(energy);
     }

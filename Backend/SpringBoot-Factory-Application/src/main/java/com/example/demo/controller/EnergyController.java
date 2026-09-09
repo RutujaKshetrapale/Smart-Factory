@@ -1,15 +1,18 @@
 package com.example.demo.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.dto.EnergyRequest;
+import com.example.demo.dto.PageResponse;
 import com.example.demo.entity.Energy;
 import com.example.demo.service.EnergyService;
+import com.example.demo.util.PaginationUtil;
 
 import jakarta.validation.Valid;
 
@@ -20,14 +23,8 @@ public class EnergyController {
     private final EnergyService energyService;
 
     public EnergyController(EnergyService energyService) {
-
         this.energyService = energyService;
     }
-
-    // =========================
-    // CREATE ENERGY RECORD
-    // ADMIN + ENGINEER
-    // =========================
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER')")
@@ -39,24 +36,37 @@ public class EnergyController {
                 .body(energyService.create(request));
     }
 
-    // =========================
-    // GET ALL ENERGY RECORDS
-    // ALL ROLES
-    // =========================
-
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR', 'MANAGER')")
-    public ResponseEntity<List<Energy>> getAll() {
+    public ResponseEntity<?> getAll(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
 
-        return ResponseEntity.ok(
-                energyService.getAll()
-        );
+        if (page == null && size == null) {
+            return ResponseEntity.ok(
+                    energyService.getAll()
+            );
+        }
+
+        int currentPage = page == null ? 0 : page;
+        int pageSize = size == null ? 10 : size;
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable =
+                PageRequest.of(currentPage, pageSize, sort);
+
+        PageResponse<Energy> response =
+                PaginationUtil.toResponse(
+                        energyService.getAll(pageable)
+                );
+
+        return ResponseEntity.ok(response);
     }
-
-    // =========================
-    // GET ENERGY BY ID
-    // ALL ROLES
-    // =========================
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR', 'MANAGER')")
@@ -68,25 +78,40 @@ public class EnergyController {
         );
     }
 
-    // =========================
-    // GET ENERGY BY MACHINE
-    // ALL ROLES
-    // =========================
-
     @GetMapping("/machine/{machineId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR', 'MANAGER')")
-    public ResponseEntity<List<Energy>> getByMachine(
-            @PathVariable Long machineId) {
+    public ResponseEntity<?> getByMachine(
+            @PathVariable Long machineId,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        if (page == null && size == null) {
+            return ResponseEntity.ok(
+                    energyService.getByMachine(machineId)
+            );
+        }
+
+        int currentPage = page == null ? 0 : page;
+        int pageSize = size == null ? 10 : size;
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable =
+                PageRequest.of(currentPage, pageSize, sort);
 
         return ResponseEntity.ok(
-                energyService.getByMachine(machineId)
+                PaginationUtil.toResponse(
+                        energyService.getByMachine(
+                                machineId,
+                                pageable
+                        )
+                )
         );
     }
-
-    // =========================
-    // UPDATE ENERGY RECORD
-    // ADMIN + ENGINEER
-    // =========================
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER')")
@@ -99,11 +124,6 @@ public class EnergyController {
         );
     }
 
-    // =========================
-    // DELETE ENERGY RECORD
-    // ADMIN ONLY
-    // =========================
-
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(
@@ -111,8 +131,6 @@ public class EnergyController {
 
         energyService.delete(id);
 
-        return ResponseEntity
-                .noContent()
-                .build();
+        return ResponseEntity.noContent().build();
     }
 }

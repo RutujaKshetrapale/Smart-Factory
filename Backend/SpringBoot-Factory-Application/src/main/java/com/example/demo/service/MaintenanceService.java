@@ -3,6 +3,8 @@ package com.example.demo.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.MaintenanceRequest;
@@ -45,8 +47,12 @@ public class MaintenanceService {
         maintenance.setMachine(machine);
         maintenance.setType(request.getType());
         maintenance.setDescription(request.getDescription());
-        maintenance.setScheduledDate(request.getScheduledDate());
-        maintenance.setCompletedDate(request.getCompletedDate());
+        maintenance.setScheduledDate(
+                request.getScheduledDate()
+        );
+        maintenance.setCompletedDate(
+                request.getCompletedDate()
+        );
         maintenance.setStatus(request.getStatus());
         maintenance.setTechnician(request.getTechnician());
         maintenance.setCreatedAt(LocalDateTime.now());
@@ -55,7 +61,7 @@ public class MaintenanceService {
     }
 
     // =========================
-    // GET ALL MAINTENANCE
+    // GET ALL
     // =========================
 
     public List<Maintenance> getAll() {
@@ -64,7 +70,16 @@ public class MaintenanceService {
     }
 
     // =========================
-    // GET MAINTENANCE BY ID
+    // GET ALL - PAGINATED
+    // =========================
+
+    public Page<Maintenance> getAll(Pageable pageable) {
+
+        return maintenanceRepository.findAll(pageable);
+    }
+
+    // =========================
+    // GET BY ID
     // =========================
 
     public Maintenance getById(Long id) {
@@ -78,10 +93,11 @@ public class MaintenanceService {
     }
 
     // =========================
-    // GET MAINTENANCE BY MACHINE
+    // GET BY MACHINE
     // =========================
 
-    public List<Maintenance> getByMachine(Long machineId) {
+    public List<Maintenance> getByMachine(
+            Long machineId) {
 
         if (!machineRepository.existsById(machineId)) {
 
@@ -90,16 +106,56 @@ public class MaintenanceService {
             );
         }
 
-        return maintenanceRepository.findByMachineId(machineId);
+        return maintenanceRepository
+                .findByMachineId(machineId);
     }
 
     // =========================
-    // GET MAINTENANCE BY STATUS
+    // GET BY MACHINE - PAGINATED
     // =========================
 
-    public List<Maintenance> getByStatus(String status) {
+    public Page<Maintenance> getByMachine(
+            Long machineId,
+            Pageable pageable) {
 
-        return maintenanceRepository.findByStatus(status);
+        if (!machineRepository.existsById(machineId)) {
+
+            throw new ResourceNotFoundException(
+                    "MACHINE NOT FOUND: " + machineId
+            );
+        }
+
+        return maintenanceRepository
+                .findByMachineId(
+                        machineId,
+                        pageable
+                );
+    }
+
+    // =========================
+    // GET BY STATUS
+    // =========================
+
+    public List<Maintenance> getByStatus(
+            String status) {
+
+        return maintenanceRepository
+                .findByStatus(status);
+    }
+
+    // =========================
+    // GET BY STATUS - PAGINATED
+    // =========================
+
+    public Page<Maintenance> getByStatus(
+            String status,
+            Pageable pageable) {
+
+        return maintenanceRepository
+                .findByStatus(
+                        status,
+                        pageable
+                );
     }
 
     // =========================
@@ -107,26 +163,48 @@ public class MaintenanceService {
     // ORDERED BY DATE
     // =========================
 
-    public List<Maintenance> getByStatusOrderByDate(String status) {
+    public List<Maintenance> getByStatusOrderByDate(
+            String status) {
 
         return maintenanceRepository
-                .findByStatusOrderByScheduledDateAsc(status);
+                .findByStatusOrderByScheduledDateAsc(
+                        status
+                );
     }
 
     // =========================
-    // UPDATE MAINTENANCE
+    // GET BY STATUS
+    // ORDERED BY DATE
+    // PAGINATED
+    // =========================
+
+    public Page<Maintenance> getByStatusOrderByDate(
+            String status,
+            Pageable pageable) {
+
+        return maintenanceRepository
+                .findByStatusOrderByScheduledDateAsc(
+                        status,
+                        pageable
+                );
+    }
+
+    // =========================
+    // UPDATE
     // =========================
 
     public Maintenance update(
             Long id,
             MaintenanceRequest request) {
 
-        Maintenance maintenance = maintenanceRepository
-                .findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "MAINTENANCE NOT FOUND: " + id
-                        ));
+        Maintenance maintenance =
+                maintenanceRepository
+                        .findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "MAINTENANCE NOT FOUND: "
+                                        + id
+                                ));
 
         Machine machine = machineRepository
                 .findById(request.getMachineId())
@@ -138,27 +216,37 @@ public class MaintenanceService {
 
         maintenance.setMachine(machine);
         maintenance.setType(request.getType());
-        maintenance.setDescription(request.getDescription());
-        maintenance.setScheduledDate(request.getScheduledDate());
-        maintenance.setCompletedDate(request.getCompletedDate());
+        maintenance.setDescription(
+                request.getDescription()
+        );
+        maintenance.setScheduledDate(
+                request.getScheduledDate()
+        );
+        maintenance.setCompletedDate(
+                request.getCompletedDate()
+        );
         maintenance.setStatus(request.getStatus());
-        maintenance.setTechnician(request.getTechnician());
+        maintenance.setTechnician(
+                request.getTechnician()
+        );
 
         return maintenanceRepository.save(maintenance);
     }
 
     // =========================
-    // DELETE MAINTENANCE
+    // DELETE
     // =========================
 
     public void delete(Long id) {
 
-        Maintenance maintenance = maintenanceRepository
-                .findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "MAINTENANCE NOT FOUND: " + id
-                        ));
+        Maintenance maintenance =
+                maintenanceRepository
+                        .findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "MAINTENANCE NOT FOUND: "
+                                        + id
+                                ));
 
         maintenanceRepository.delete(maintenance);
     }

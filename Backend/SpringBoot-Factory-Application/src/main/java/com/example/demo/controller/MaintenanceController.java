@@ -1,15 +1,18 @@
 package com.example.demo.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.dto.MaintenanceRequest;
+import com.example.demo.dto.PageResponse;
 import com.example.demo.entity.Maintenance;
 import com.example.demo.service.MaintenanceService;
+import com.example.demo.util.PaginationUtil;
 
 import jakarta.validation.Valid;
 
@@ -25,11 +28,6 @@ public class MaintenanceController {
         this.maintenanceService = maintenanceService;
     }
 
-    // =========================
-    // CREATE MAINTENANCE
-    // ADMIN + ENGINEER
-    // =========================
-
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER')")
     public ResponseEntity<Maintenance> create(
@@ -40,24 +38,37 @@ public class MaintenanceController {
                 .body(maintenanceService.create(request));
     }
 
-    // =========================
-    // GET ALL MAINTENANCE
-    // ALL ROLES
-    // =========================
-
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR', 'MANAGER')")
-    public ResponseEntity<List<Maintenance>> getAll() {
+    public ResponseEntity<?> getAll(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
 
-        return ResponseEntity.ok(
-                maintenanceService.getAll()
-        );
+        if (page == null && size == null) {
+            return ResponseEntity.ok(
+                    maintenanceService.getAll()
+            );
+        }
+
+        int currentPage = page == null ? 0 : page;
+        int pageSize = size == null ? 10 : size;
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable =
+                PageRequest.of(currentPage, pageSize, sort);
+
+        PageResponse<Maintenance> response =
+                PaginationUtil.toResponse(
+                        maintenanceService.getAll(pageable)
+                );
+
+        return ResponseEntity.ok(response);
     }
-
-    // =========================
-    // GET MAINTENANCE BY ID
-    // ALL ROLES
-    // =========================
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR', 'MANAGER')")
@@ -69,57 +80,110 @@ public class MaintenanceController {
         );
     }
 
-    // =========================
-    // GET BY MACHINE
-    // ALL ROLES
-    // =========================
-
     @GetMapping("/machine/{machineId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR', 'MANAGER')")
-    public ResponseEntity<List<Maintenance>> getByMachine(
-            @PathVariable Long machineId) {
+    public ResponseEntity<?> getByMachine(
+            @PathVariable Long machineId,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        if (page == null && size == null) {
+            return ResponseEntity.ok(
+                    maintenanceService.getByMachine(machineId)
+            );
+        }
+
+        int currentPage = page == null ? 0 : page;
+        int pageSize = size == null ? 10 : size;
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable =
+                PageRequest.of(currentPage, pageSize, sort);
 
         return ResponseEntity.ok(
-                maintenanceService.getByMachine(machineId)
+                PaginationUtil.toResponse(
+                        maintenanceService.getByMachine(
+                                machineId,
+                                pageable
+                        )
+                )
         );
     }
-
-    // =========================
-    // GET BY STATUS
-    // ALL ROLES
-    // =========================
 
     @GetMapping("/status/{status}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR', 'MANAGER')")
-    public ResponseEntity<List<Maintenance>> getByStatus(
-            @PathVariable String status) {
+    public ResponseEntity<?> getByStatus(
+            @PathVariable String status,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        if (page == null && size == null) {
+            return ResponseEntity.ok(
+                    maintenanceService.getByStatus(status)
+            );
+        }
+
+        int currentPage = page == null ? 0 : page;
+        int pageSize = size == null ? 10 : size;
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable =
+                PageRequest.of(currentPage, pageSize, sort);
 
         return ResponseEntity.ok(
-                maintenanceService.getByStatus(status)
+                PaginationUtil.toResponse(
+                        maintenanceService.getByStatus(
+                                status,
+                                pageable
+                        )
+                )
         );
     }
 
-    // =========================
-    // GET BY STATUS
-    // ORDERED BY DATE
-    // ALL ROLES
-    // =========================
-
-    @GetMapping("/status/{status}/scheduled")
+    @GetMapping("/status/{status}/sorted")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'OPERATOR', 'MANAGER')")
-    public ResponseEntity<List<Maintenance>> getByStatusOrderByDate(
-            @PathVariable String status) {
+    public ResponseEntity<?> getByStatusSorted(
+            @PathVariable String status,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(defaultValue = "scheduledDate") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        if (page == null && size == null) {
+            return ResponseEntity.ok(
+                    maintenanceService.getByStatusOrderByDate(status)
+            );
+        }
+
+        int currentPage = page == null ? 0 : page;
+        int pageSize = size == null ? 10 : size;
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable =
+                PageRequest.of(currentPage, pageSize, sort);
 
         return ResponseEntity.ok(
-                maintenanceService
-                        .getByStatusOrderByDate(status)
+                PaginationUtil.toResponse(
+                        maintenanceService.getByStatusOrderByDate(
+                                status,
+                                pageable
+                        )
+                )
         );
     }
-
-    // =========================
-    // UPDATE MAINTENANCE
-    // ADMIN + ENGINEER
-    // =========================
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER')")
@@ -132,11 +196,6 @@ public class MaintenanceController {
         );
     }
 
-    // =========================
-    // DELETE MAINTENANCE
-    // ADMIN ONLY
-    // =========================
-
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(
@@ -144,8 +203,7 @@ public class MaintenanceController {
 
         maintenanceService.delete(id);
 
-        return ResponseEntity
-                .noContent()
-                .build();
+        return ResponseEntity.noContent().build();
     }
 }
+

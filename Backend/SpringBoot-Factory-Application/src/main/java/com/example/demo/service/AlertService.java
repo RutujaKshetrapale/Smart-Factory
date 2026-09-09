@@ -3,6 +3,8 @@ package com.example.demo.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.AlertRequest;
@@ -16,7 +18,6 @@ import com.example.demo.repository.MachineRepository;
 public class AlertService {
 
     private final AlertRepository alertRepository;
-
     private final MachineRepository machineRepository;
 
     public AlertService(
@@ -63,6 +64,15 @@ public class AlertService {
     }
 
     // =========================
+    // GET ALL ALERTS - PAGINATED
+    // =========================
+
+    public Page<Alert> getAll(Pageable pageable) {
+
+        return alertRepository.findAll(pageable);
+    }
+
+    // =========================
     // GET ALERT BY ID
     // =========================
 
@@ -93,10 +103,77 @@ public class AlertService {
     }
 
     // =========================
+    // GET ALERTS BY MACHINE
+    // PAGINATED
+    // =========================
+
+    public Page<Alert> getByMachine(
+            Long machineId,
+            Pageable pageable) {
+
+        if (!machineRepository.existsById(machineId)) {
+
+            throw new ResourceNotFoundException(
+                    "MACHINE NOT FOUND: " + machineId
+            );
+        }
+
+        return alertRepository.findByMachineId(
+                machineId,
+                pageable
+        );
+    }
+
+    // =========================
+    // GET UNRESOLVED ALERTS
+    // =========================
+
+    public List<Alert> getUnresolved() {
+
+        return alertRepository.findByResolvedFalse();
+    }
+
+    // =========================
+    // GET UNRESOLVED ALERTS
+    // PAGINATED
+    // =========================
+
+    public Page<Alert> getUnresolved(Pageable pageable) {
+
+        return alertRepository.findByResolvedFalse(pageable);
+    }
+
+    // =========================
+    // GET ALERTS BY SEVERITY
+    // =========================
+
+    public List<Alert> getBySeverity(String severity) {
+
+        return alertRepository.findBySeverity(severity);
+    }
+
+    // =========================
+    // GET ALERTS BY SEVERITY
+    // PAGINATED
+    // =========================
+
+    public Page<Alert> getBySeverity(
+            String severity,
+            Pageable pageable) {
+
+        return alertRepository.findBySeverity(
+                severity,
+                pageable
+        );
+    }
+
+    // =========================
     // UPDATE ALERT
     // =========================
 
-    public Alert update(Long id, AlertRequest request) {
+    public Alert update(
+            Long id,
+            AlertRequest request) {
 
         Alert alert = alertRepository
                 .findById(id)

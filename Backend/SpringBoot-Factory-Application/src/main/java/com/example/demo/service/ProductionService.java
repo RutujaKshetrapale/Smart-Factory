@@ -2,6 +2,8 @@ package com.example.demo.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.ProductionRequest;
@@ -15,7 +17,6 @@ import com.example.demo.repository.ProductionRepository;
 public class ProductionService {
 
     private final ProductionRepository productionRepository;
-
     private final MachineRepository machineRepository;
 
     public ProductionService(
@@ -23,7 +24,6 @@ public class ProductionService {
             MachineRepository machineRepository) {
 
         this.productionRepository = productionRepository;
-
         this.machineRepository = machineRepository;
     }
 
@@ -31,7 +31,8 @@ public class ProductionService {
     // CREATE PRODUCTION
     // =========================
 
-    public Production create(ProductionRequest request) {
+    public Production create(
+            ProductionRequest request) {
 
         Machine machine = machineRepository
                 .findById(request.getMachineId())
@@ -73,7 +74,7 @@ public class ProductionService {
     }
 
     // =========================
-    // GET ALL PRODUCTIONS
+    // GET ALL
     // =========================
 
     public List<Production> getAll() {
@@ -82,7 +83,18 @@ public class ProductionService {
     }
 
     // =========================
-    // GET PRODUCTION BY ID
+    // GET ALL - PAGINATED
+    // =========================
+
+    public Page<Production> getAll(
+            Pageable pageable) {
+
+        return productionRepository
+                .findAll(pageable);
+    }
+
+    // =========================
+    // GET BY ID
     // =========================
 
     public Production getById(Long id) {
@@ -91,20 +103,23 @@ public class ProductionService {
                 .findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "PRODUCTION NOT FOUND: " + id
+                                "PRODUCTION NOT FOUND: "
+                                + id
                         ));
     }
 
     // =========================
-    // GET PRODUCTIONS BY MACHINE
+    // GET BY MACHINE
     // =========================
 
-    public List<Production> getByMachine(Long machineId) {
+    public List<Production> getByMachine(
+            Long machineId) {
 
         if (!machineRepository.existsById(machineId)) {
 
             throw new ResourceNotFoundException(
-                    "MACHINE NOT FOUND: " + machineId
+                    "MACHINE NOT FOUND: "
+                    + machineId
             );
         }
 
@@ -113,29 +128,70 @@ public class ProductionService {
     }
 
     // =========================
-    // GET PRODUCTIONS BY STATUS
+    // GET BY MACHINE - PAGINATED
     // =========================
 
-    public List<Production> getByStatus(String status) {
+    public Page<Production> getByMachine(
+            Long machineId,
+            Pageable pageable) {
+
+        if (!machineRepository.existsById(machineId)) {
+
+            throw new ResourceNotFoundException(
+                    "MACHINE NOT FOUND: "
+                    + machineId
+            );
+        }
+
+        return productionRepository
+                .findByMachineId(
+                        machineId,
+                        pageable
+                );
+    }
+
+    // =========================
+    // GET BY STATUS
+    // =========================
+
+    public List<Production> getByStatus(
+            String status) {
 
         return productionRepository
                 .findByStatus(status);
     }
 
     // =========================
-    // UPDATE PRODUCTION
+    // GET BY STATUS - PAGINATED
+    // =========================
+
+    public Page<Production> getByStatus(
+            String status,
+            Pageable pageable) {
+
+        return productionRepository
+                .findByStatus(
+                        status,
+                        pageable
+                );
+    }
+
+    // =========================
+    // UPDATE
     // =========================
 
     public Production update(
             Long id,
             ProductionRequest request) {
 
-        Production production = productionRepository
-                .findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "PRODUCTION NOT FOUND: " + id
-                        ));
+        Production production =
+                productionRepository
+                        .findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "PRODUCTION NOT FOUND: "
+                                        + id
+                                ));
 
         Machine machine = machineRepository
                 .findById(request.getMachineId())
@@ -175,17 +231,19 @@ public class ProductionService {
     }
 
     // =========================
-    // DELETE PRODUCTION
+    // DELETE
     // =========================
 
     public void delete(Long id) {
 
-        Production production = productionRepository
-                .findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "PRODUCTION NOT FOUND: " + id
-                        ));
+        Production production =
+                productionRepository
+                        .findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "PRODUCTION NOT FOUND: "
+                                        + id
+                                ));
 
         productionRepository.delete(production);
     }

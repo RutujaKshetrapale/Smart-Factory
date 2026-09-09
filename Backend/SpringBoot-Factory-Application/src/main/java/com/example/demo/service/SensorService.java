@@ -2,12 +2,13 @@ package com.example.demo.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.SensorRequest;
 import com.example.demo.entity.Machine;
 import com.example.demo.entity.Sensor;
-import com.example.demo.exception.BusinessValidationException;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.MachineRepository;
 import com.example.demo.repository.SensorRepository;
@@ -26,7 +27,6 @@ public class SensorService {
         this.machineRepository = machineRepository;
     }
 
-    // CREATE
     public Sensor create(SensorRequest request) {
 
         Machine machine = machineRepository
@@ -35,50 +35,32 @@ public class SensorService {
                         new ResourceNotFoundException(
                                 "MACHINE NOT FOUND: "
                                 + request.getMachineId()
-                        )
-                );
-
-        // Sensors cannot be attached to offline machines
-        if ("OFFLINE".equalsIgnoreCase(
-                machine.getStatus())) {
-
-            throw new BusinessValidationException(
-                    "Cannot attach sensor to an offline machine"
-            );
-        }
+                        ));
 
         Sensor sensor = new Sensor();
 
-        sensor.setName(
-                request.getName().trim()
-        );
-
-        sensor.setType(
-                request.getType().trim()
-        );
-
-        sensor.setUnit(
-                request.getUnit().trim()
-        );
-
-        // Default sensor status = ACTIVE
-        sensor.setActive(
-                request.getActive() == null
-                        || request.getActive()
-        );
-
+        sensor.setName(request.getName().trim());
+        sensor.setType(request.getType().trim());
+        sensor.setUnit(request.getUnit().trim());
         sensor.setMachine(machine);
+
+        if (request.getActive() != null) {
+            sensor.setActive(request.getActive());
+        } else {
+            sensor.setActive(true);
+        }
 
         return sensorRepository.save(sensor);
     }
 
-    // GET ALL
     public List<Sensor> getAll() {
-
         return sensorRepository.findAll();
     }
 
-    // GET BY ID
+    public Page<Sensor> getAll(Pageable pageable) {
+        return sensorRepository.findAll(pageable);
+    }
+
     public Sensor getById(Long id) {
 
         return sensorRepository
@@ -86,27 +68,118 @@ public class SensorService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "SENSOR NOT FOUND: " + id
-                        )
-                );
+                        ));
     }
 
-    // GET BY MACHINE
-    public List<Sensor> getByMachineId(
-            Long machineId) {
+    public List<Sensor> getByMachine(Long machineId) {
 
-        // Verify machine exists
         if (!machineRepository.existsById(machineId)) {
+            throw new ResourceNotFoundException(
+                    "MACHINE NOT FOUND: " + machineId
+            );
+        }
 
+        return sensorRepository.findByMachineId(machineId);
+    }
+
+    public Page<Sensor> getByMachine(
+            Long machineId,
+            Pageable pageable) {
+
+        if (!machineRepository.existsById(machineId)) {
+            throw new ResourceNotFoundException(
+                    "MACHINE NOT FOUND: " + machineId
+            );
+        }
+
+        return sensorRepository.findByMachineId(
+                machineId,
+                pageable
+        );
+    }
+
+    public List<Sensor> getActive() {
+        return sensorRepository.findByActiveTrue();
+    }
+
+    public Page<Sensor> getActive(Pageable pageable) {
+        return sensorRepository.findByActiveTrue(pageable);
+    }
+
+    public List<Sensor> getInactive() {
+        return sensorRepository.findByActiveFalse();
+    }
+
+    public Page<Sensor> getInactive(Pageable pageable) {
+        return sensorRepository.findByActiveFalse(pageable);
+    }
+
+    public List<Sensor> getByType(String type) {
+        return sensorRepository.findByTypeIgnoreCase(type);
+    }
+
+    public Page<Sensor> getByType(
+            String type,
+            Pageable pageable) {
+
+        return sensorRepository.findByTypeIgnoreCase(
+                type,
+                pageable
+        );
+    }
+
+    public List<Sensor> getByMachineAndType(
+            Long machineId,
+            String type) {
+
+        if (!machineRepository.existsById(machineId)) {
             throw new ResourceNotFoundException(
                     "MACHINE NOT FOUND: " + machineId
             );
         }
 
         return sensorRepository
-                .findByMachineId(machineId);
+                .findByMachineIdAndTypeIgnoreCase(
+                        machineId,
+                        type
+                );
     }
 
-    // UPDATE
+    public Page<Sensor> getByMachineAndType(
+            Long machineId,
+            String type,
+            Pageable pageable) {
+
+        if (!machineRepository.existsById(machineId)) {
+            throw new ResourceNotFoundException(
+                    "MACHINE NOT FOUND: " + machineId
+            );
+        }
+
+        return sensorRepository
+                .findByMachineIdAndTypeIgnoreCase(
+                        machineId,
+                        type,
+                        pageable
+                );
+    }
+
+    public List<Sensor> searchByName(String name) {
+        return sensorRepository
+                .findByNameContainingIgnoreCase(name);
+    }
+
+    public Page<Sensor> searchByName(
+            String name,
+            Pageable pageable) {
+
+        return sensorRepository
+                .findByNameContainingIgnoreCase(
+                        name,
+                        pageable
+                );
+    }
+
     public Sensor update(
             Long id,
             SensorRequest request) {
@@ -119,63 +192,20 @@ public class SensorService {
                         new ResourceNotFoundException(
                                 "MACHINE NOT FOUND: "
                                 + request.getMachineId()
-                        )
-                );
+                        ));
 
-        // Sensors cannot be attached to offline machines
-        if ("OFFLINE".equalsIgnoreCase(
-                machine.getStatus())) {
-
-            throw new BusinessValidationException(
-                    "Cannot attach sensor to an offline machine"
-            );
-        }
-
-        sensor.setName(
-                request.getName().trim()
-        );
-
-        sensor.setType(
-                request.getType().trim()
-        );
-
-        sensor.setUnit(
-                request.getUnit().trim()
-        );
-
+        sensor.setName(request.getName().trim());
+        sensor.setType(request.getType().trim());
+        sensor.setUnit(request.getUnit().trim());
         sensor.setMachine(machine);
 
         if (request.getActive() != null) {
-
-            sensor.setActive(
-                    request.getActive()
-            );
+            sensor.setActive(request.getActive());
         }
 
         return sensorRepository.save(sensor);
     }
 
-    // ACTIVATE
-    public Sensor activate(Long id) {
-
-        Sensor sensor = getById(id);
-
-        sensor.setActive(true);
-
-        return sensorRepository.save(sensor);
-    }
-
-    // DEACTIVATE
-    public Sensor deactivate(Long id) {
-
-        Sensor sensor = getById(id);
-
-        sensor.setActive(false);
-
-        return sensorRepository.save(sensor);
-    }
-
-    // DELETE
     public void delete(Long id) {
 
         Sensor sensor = getById(id);

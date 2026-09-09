@@ -2,6 +2,8 @@ package com.example.demo.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.MachineRequest;
@@ -29,59 +31,40 @@ public class MachineService {
         this.domainValidationService = domainValidationService;
     }
 
-    // CREATE
     public Machine create(MachineRequest request) {
 
-        // Validate machine status
-        domainValidationService.validateMachineStatus(
-                request.getStatus()
-        );
-
-        // Find plant
         Plant plant = plantRepository
                 .findById(request.getPlantId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "PLANT NOT FOUND: "
                                 + request.getPlantId()
-                        )
-                );
+                        ));
 
-        // Machine cannot be created inside inactive plant
-        if (!plant.isActive()) {
-            throw new BusinessValidationException(
-                    "Cannot create machine in an inactive plant"
-            );
-        }
+        domainValidationService.validateMachineStatus(
+                request.getStatus()
+        );
 
         Machine machine = new Machine();
 
-        machine.setName(
-                request.getName().trim()
-        );
-
-        machine.setType(
-                request.getType().trim()
-        );
-
+        machine.setName(request.getName().trim());
+        machine.setType(request.getType().trim());
         machine.setStatus(
-                request.getStatus()
-                        .trim()
-                        .toUpperCase()
+                request.getStatus().trim().toUpperCase()
         );
-
         machine.setPlant(plant);
 
         return machineRepository.save(machine);
     }
 
-    // GET ALL
     public List<Machine> getAll() {
-
         return machineRepository.findAll();
     }
 
-    // GET BY ID
+    public Page<Machine> getAll(Pageable pageable) {
+        return machineRepository.findAll(pageable);
+    }
+
     public Machine getById(Long id) {
 
         return machineRepository
@@ -89,75 +72,144 @@ public class MachineService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "MACHINE NOT FOUND: " + id
-                        )
+                        ));
+    }
+
+    public List<Machine> getByPlant(Long plantId) {
+
+        if (!plantRepository.existsById(plantId)) {
+            throw new ResourceNotFoundException(
+                    "PLANT NOT FOUND: " + plantId
+            );
+        }
+
+        return machineRepository.findByPlantId(plantId);
+    }
+
+    public Page<Machine> getByPlant(
+            Long plantId,
+            Pageable pageable) {
+
+        if (!plantRepository.existsById(plantId)) {
+            throw new ResourceNotFoundException(
+                    "PLANT NOT FOUND: " + plantId
+            );
+        }
+
+        return machineRepository.findByPlantId(
+                plantId,
+                pageable
+        );
+    }
+
+    public List<Machine> getByStatus(String status) {
+
+        domainValidationService.validateMachineStatus(status);
+
+        return machineRepository
+                .findByStatusIgnoreCase(status.trim());
+    }
+
+    public Page<Machine> getByStatus(
+            String status,
+            Pageable pageable) {
+
+        domainValidationService.validateMachineStatus(status);
+
+        return machineRepository.findByStatusIgnoreCase(
+                status.trim(),
+                pageable
+        );
+    }
+
+    public List<Machine> getByPlantAndStatus(
+            Long plantId,
+            String status) {
+
+        if (!plantRepository.existsById(plantId)) {
+            throw new ResourceNotFoundException(
+                    "PLANT NOT FOUND: " + plantId
+            );
+        }
+
+        domainValidationService.validateMachineStatus(status);
+
+        return machineRepository
+                .findByPlantIdAndStatusIgnoreCase(
+                        plantId,
+                        status.trim()
                 );
     }
 
-    // UPDATE
+    public Page<Machine> getByPlantAndStatus(
+            Long plantId,
+            String status,
+            Pageable pageable) {
+
+        if (!plantRepository.existsById(plantId)) {
+            throw new ResourceNotFoundException(
+                    "PLANT NOT FOUND: " + plantId
+            );
+        }
+
+        domainValidationService.validateMachineStatus(status);
+
+        return machineRepository
+                .findByPlantIdAndStatusIgnoreCase(
+                        plantId,
+                        status.trim(),
+                        pageable
+                );
+    }
+
+    public List<Machine> searchByName(String name) {
+        return machineRepository
+                .findByNameContainingIgnoreCase(name);
+    }
+
+    public Page<Machine> searchByName(
+            String name,
+            Pageable pageable) {
+
+        return machineRepository
+                .findByNameContainingIgnoreCase(
+                        name,
+                        pageable
+                );
+    }
+
     public Machine update(
             Long id,
             MachineRequest request) {
 
-        // Validate machine status
-        domainValidationService.validateMachineStatus(
-                request.getStatus()
-        );
+        Machine machine = getById(id);
 
-        // Find existing machine
-        Machine machine = machineRepository
-                .findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "MACHINE NOT FOUND: " + id
-                        )
-                );
-
-        // Find new plant
         Plant plant = plantRepository
                 .findById(request.getPlantId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "PLANT NOT FOUND: "
                                 + request.getPlantId()
-                        )
-                );
+                        ));
 
-        // Machine cannot be assigned to inactive plant
-        if (!plant.isActive()) {
-            throw new BusinessValidationException(
-                    "Cannot assign machine to an inactive plant"
-            );
-        }
-
-        machine.setName(
-                request.getName().trim()
-        );
-
-        machine.setType(
-                request.getType().trim()
-        );
-
-        machine.setStatus(
+        domainValidationService.validateMachineStatus(
                 request.getStatus()
-                        .trim()
-                        .toUpperCase()
         );
 
+        machine.setName(request.getName().trim());
+        machine.setType(request.getType().trim());
+        machine.setStatus(
+                request.getStatus().trim().toUpperCase()
+        );
         machine.setPlant(plant);
 
         return machineRepository.save(machine);
     }
 
-    // DELETE
     public void delete(Long id) {
 
-        if (!machineRepository.existsById(id)) {
+        Machine machine = getById(id);
 
-            throw new ResourceNotFoundException(
-                    "MACHINE NOT FOUND: " + id
-            );
-        }
-
-        machineRepository.deleteById(id);
+        machineRepository.delete(machine);
     }
 }
