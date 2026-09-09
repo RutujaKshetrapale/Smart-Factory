@@ -28,37 +28,19 @@ public class Telemetry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(
-        nullable = false,
-        precision = 10,
-        scale = 2
-    )
+    @Column(nullable = false)
     private Double temperature;
 
-    @Column(
-        nullable = false,
-        precision = 10,
-        scale = 2
-    )
+    @Column(nullable = false)
     private Double vibration;
 
-    @Column(
-        nullable = false,
-        precision = 10,
-        scale = 2
-    )
+    @Column(nullable = false)
     private Double pressure;
 
-    @Column(
-        nullable = false,
-        precision = 10,
-        scale = 2
-    )
+    @Column(nullable = false)
     private Double rpm;
 
-    @Column(
-        nullable = false
-    )
+    @Column(nullable = false)
     private LocalDateTime timestamp;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

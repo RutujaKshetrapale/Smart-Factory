@@ -80,13 +80,16 @@ public class Alert {
     )
     private Telemetry telemetry;
 
+    // Default constructor
     public Alert() {
     }
 
+    // ID
     public Long getId() {
         return id;
     }
 
+    // Type
     public String getType() {
         return type;
     }
@@ -95,6 +98,7 @@ public class Alert {
         this.type = type;
     }
 
+    // Severity
     public String getSeverity() {
         return severity;
     }
@@ -103,6 +107,7 @@ public class Alert {
         this.severity = severity;
     }
 
+    // Message
     public String getMessage() {
         return message;
     }
@@ -111,6 +116,7 @@ public class Alert {
         this.message = message;
     }
 
+    // Resolved
     public boolean isResolved() {
         return resolved;
     }
@@ -119,6 +125,7 @@ public class Alert {
         this.resolved = resolved;
     }
 
+    // Created At
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -127,6 +134,7 @@ public class Alert {
         this.createdAt = createdAt;
     }
 
+    // Machine
     public Machine getMachine() {
         return machine;
     }
@@ -135,6 +143,7 @@ public class Alert {
         this.machine = machine;
     }
 
+    // Telemetry
     public Telemetry getTelemetry() {
         return telemetry;
     }
@@ -143,3 +152,4 @@ public class Alert {
         this.telemetry = telemetry;
     }
 }
+

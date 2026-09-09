@@ -28,12 +28,7 @@ public class Energy {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(
-        name = "energy_consumption",
-        nullable = false,
-        precision = 12,
-        scale = 3
-    )
+    @Column(nullable = false)
     private Double energyConsumption;
 
     @Column(
