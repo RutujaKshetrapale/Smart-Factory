@@ -2,22 +2,41 @@ package com.example.demo.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public class SensorRequest {
 
-    @NotBlank
+    @NotBlank(message = "Sensor name is required")
+    @Size(
+        min = 2,
+        max = 100,
+        message = "Sensor name must be between 2 and 100 characters"
+    )
     private String name;
 
-    @NotBlank
+    @NotBlank(message = "Sensor type is required")
+    @Size(
+        min = 2,
+        max = 50,
+        message = "Sensor type must be between 2 and 50 characters"
+    )
     private String type;
 
-    @NotBlank
+    @NotBlank(message = "Sensor unit is required")
+    @Size(
+        min = 1,
+        max = 20,
+        message = "Sensor unit must be between 1 and 20 characters"
+    )
     private String unit;
 
-    @NotNull
+    @NotNull(message = "Machine ID is required")
     private Long machineId;
 
     private Boolean active;
+
+    public SensorRequest() {
+    }
 
     public String getName() {
         return name;

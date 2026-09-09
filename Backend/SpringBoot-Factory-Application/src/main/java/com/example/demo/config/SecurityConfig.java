@@ -12,19 +12,30 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
+
+import com.example.demo.security.RestAccessDeniedHandler;
+import com.example.demo.security.RestAuthenticationEntryPoint;
 
 import com.example.demo.security.JwtAuthenticationFilter;
 
 @EnableMethodSecurity
 @Configuration
 public class SecurityConfig {
-
+	
+	private final RestAuthenticationEntryPoint authenticationEntryPoint;
+	private final RestAccessDeniedHandler accessDeniedHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     public SecurityConfig(
-            JwtAuthenticationFilter jwtAuthenticationFilter) {
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            RestAuthenticationEntryPoint authenticationEntryPoint,
+            RestAccessDeniedHandler accessDeniedHandler) {
 
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.authenticationEntryPoint = authenticationEntryPoint;
+        this.accessDeniedHandler = accessDeniedHandler;
     }
 
     @Bean
@@ -44,6 +55,11 @@ public class SecurityConfig {
                     SessionCreationPolicy.STATELESS
                 )
             )
+            
+            .exceptionHandling(exception -> exception
+            	    .authenticationEntryPoint(authenticationEntryPoint)
+            	    .accessDeniedHandler(accessDeniedHandler)
+            	)
 
             .authorizeHttpRequests(auth -> auth
 
@@ -72,6 +88,7 @@ public class SecurityConfig {
                 jwtAuthenticationFilter,
                 UsernamePasswordAuthenticationFilter.class
             );
+        	
 
         return http.build();
     }

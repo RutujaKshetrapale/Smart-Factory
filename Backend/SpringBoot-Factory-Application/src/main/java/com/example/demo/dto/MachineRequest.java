@@ -2,20 +2,39 @@ package com.example.demo.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public class MachineRequest {
 
-    @NotBlank
+    @NotBlank(message = "Machine name is required")
+    @Size(
+        min = 2,
+        max = 100,
+        message = "Machine name must be between 2 and 100 characters"
+    )
     private String name;
 
-    @NotBlank
+    @NotBlank(message = "Machine type is required")
+    @Size(
+        min = 2,
+        max = 100,
+        message = "Machine type must be between 2 and 100 characters"
+    )
     private String type;
 
-    @NotBlank
+    @NotBlank(message = "Machine status is required")
+    @Size(
+        min = 2,
+        max = 30,
+        message = "Machine status cannot exceed 30 characters"
+    )
     private String status;
 
-    @NotNull
+    @NotNull(message = "Plant ID is required")
     private Long plantId;
+
+    public MachineRequest() {
+    }
 
     public String getName() {
         return name;

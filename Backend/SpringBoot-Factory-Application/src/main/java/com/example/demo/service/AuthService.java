@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.example.demo.dto.LoginRequest;
 import com.example.demo.dto.LoginResponse;
 import com.example.demo.dto.RegisterRequest;
+import com.example.demo.entity.Role;
 import com.example.demo.entity.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.JwtService;
@@ -27,7 +28,6 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
-    // REGISTER
     public User register(RegisterRequest request) {
 
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -53,13 +53,15 @@ public class AuthService {
                 passwordEncoder.encode(request.getPassword())
         );
 
-        user.setRole(request.getRole());
+        // New users cannot choose ADMIN/ENGINEER/MANAGER.
+        // Default role is OPERATOR.
+        user.setRole(Role.OPERATOR);
+
         user.setActive(true);
 
         return userRepository.save(user);
     }
 
-    // LOGIN
     public LoginResponse login(LoginRequest request) {
 
         User user = userRepository
